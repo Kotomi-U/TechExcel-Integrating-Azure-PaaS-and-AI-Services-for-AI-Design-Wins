@@ -37,7 +37,6 @@ var searchServiceName = '${uniqueString(resourceGroup().id)}-search'
 var openAIName = '${uniqueString(resourceGroup().id)}-openai'
 var speechServiceName = '${uniqueString(resourceGroup().id)}-speech'
 var languageServiceName = '${uniqueString(resourceGroup().id)}-lang'
-var webAppNameApi = '${uniqueString(resourceGroup().id)}-api'
 var webAppNameDash = '${uniqueString(resourceGroup().id)}-dash'
 var appServicePlanName = '${uniqueString(resourceGroup().id)}-cosu-asp'
 var functionAppName = '${uniqueString(resourceGroup().id)}-cosu-fn'
@@ -246,45 +245,6 @@ resource appServicePlan 'Microsoft.Web/serverFarms@2022-09-01' = {
   }
 }
 
-@description('Creates an Azure App Service for the API.')
-resource appServiceApp 'Microsoft.Web/sites@2022-09-01' = {
-  name: webAppNameApi
-  location: location
-  properties: {
-    serverFarmId: appServicePlan.id
-    httpsOnly: true
-    clientAffinityEnabled: false
-    siteConfig: {
-      linuxFxVersion: 'DOCKER|${containerRegistry.name}.azurecr.io/${uniqueString(resourceGroup().id)}/techexcel/csapi'
-      http20Enabled: true
-      minTlsVersion: '1.2'
-      appCommandLine: ''
-      appSettings: [
-        {
-          name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
-          value: 'false'
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_URL'
-          value: 'https://${containerRegistry.name}.azurecr.io'
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_USERNAME'
-          value: containerRegistry.name
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_PASSWORD'
-          value: containerRegistry.listCredentials().passwords[0].value
-        }
-        {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: appInsights.properties.InstrumentationKey
-        }
-        ]
-      }
-    }
-}
-
 @description('Creates an Azure App Service for the Dashboard.')
 resource appServiceAppDash 'Microsoft.Web/sites@2022-09-01' = {
   name: webAppNameDash
@@ -396,8 +356,6 @@ output storageAccountName string = storageAccount.name
 output searchServiceName string = searchService.name
 output openAIEndpoint string = openAI.properties.endpoint
 output speechServiceName string = speechService.name
-output application_name string = appServiceApp.name
-output application_url string = appServiceApp.properties.hostNames[0]
 output container_registry_name string = containerRegistry.name
 output application_name_dash string = appServiceAppDash.name
 output application_url_dash string = appServiceAppDash.properties.hostNames[0]
