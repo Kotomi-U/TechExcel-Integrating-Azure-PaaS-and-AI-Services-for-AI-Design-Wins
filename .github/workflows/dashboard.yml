@@ -1,5 +1,8 @@
 name: Dashboard Deployment
 
+permissions:
+  contents: write
+  
 env:
   registryName: gfj3ngyufhlxccosureg.azurecr.io
   repositoryName: techexcel/csdash
