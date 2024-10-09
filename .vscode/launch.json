@@ -6,6 +6,26 @@
       "type": "coreclr",
       "request": "attach",
       "processId": "${command:azureFunctions.pickProcess}"
+    },
+    {
+      "name": "Launch .NET Functions",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "clean (functions)",
+      "program": "${workspaceFolder}/src/ContosoSuitesVectorizationFunction/bin/Debug/net6.0/ContosoSuitesVectorizationFunction.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/ContosoSuitesVectorizationFunction",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
     }
   ]
 }

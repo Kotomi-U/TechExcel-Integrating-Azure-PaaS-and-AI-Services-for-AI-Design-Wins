@@ -16,6 +16,8 @@ namespace ContosoSuites.Functions
         const string DatabaseName = "ContosoSuites";
         const string ContainerName = "MaintenanceRequests";
 
+        private const string ConnectionStringSetting = "CosmosDBConnectionString";
+
         public CosmosChangeFeedVectorization(ILoggerFactory loggerFactory)
         {
             var endpointUrl = Environment.GetEnvironmentVariable("AzureOpenAIEndpoint");
@@ -38,11 +40,11 @@ namespace ContosoSuites.Functions
         }
 
         [Function("VectorizeMaintenanceRequests")]
-        [CosmosDBOutput(DatabaseName, ContainerName, Connection = "CosmosDBConnectionString")]
+        [CosmosDBOutput(DatabaseName, ContainerName, Connection = ConnectionStringSetting)]
         public object Run([CosmosDBTrigger(
             databaseName: DatabaseName,
             containerName: ContainerName,
-            Connection = "CosmosDBConnectionString",
+            Connection = ConnectionStringSetting,
             LeaseContainerName = "leases",
             CreateLeaseContainerIfNotExists = true)] IReadOnlyList<MaintenanceRequest> input)
         {
