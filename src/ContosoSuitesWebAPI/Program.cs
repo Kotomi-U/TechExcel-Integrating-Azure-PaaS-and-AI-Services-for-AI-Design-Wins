@@ -1,7 +1,8 @@
 using Microsoft.Azure.Cosmos;
 using ContosoSuitesWebAPI.Agents;
 using ContosoSuitesWebAPI.Services;
-using Azure.AI.OpenAI;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Embeddings;
 using Azure;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,17 +42,16 @@ builder.Services.AddSingleton<Kernel>((_) =>
         endpoint: builder.Configuration["AzureOpenAI:Endpoint"]!,
         apiKey: builder.Configuration["AzureOpenAI:ApiKey"]!
     );
+#pragma warning disable SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    kernelBuilder.AddAzureOpenAITextEmbeddingGeneration(
+        deploymentName: builder.Configuration["AzureOpenAI:EmbeddingDeploymentName"]!,
+        endpoint: builder.Configuration["AzureOpenAI:Endpoint"]!,
+        apiKey: builder.Configuration["AzureOpenAI:ApiKey"]!
+    );
+#pragma warning restore SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
     kernelBuilder.Plugins.AddFromType<DatabaseService>();
     return kernelBuilder.Build();
-});
-
-builder.Services.AddSingleton<AzureOpenAIClient>((_) =>
-{
-    var endpoint = new Uri(builder.Configuration["AzureOpenAI:Endpoint"]!);
-    var credentials = new AzureKeyCredential(builder.Configuration["AzureOpenAI:ApiKey"]!);
-
-    var client = new AzureOpenAIClient(endpoint, credentials);
-    return client;
 });
 
 var app = builder.Build();
@@ -106,8 +106,8 @@ app.MapGet("/Vectorize", async (string text, [FromServices] IVectorizationServic
 
 app.MapPost("/VectorSearch", async ([FromBody] float[] queryVector, [FromServices] IVectorizationService vectorizationService, int max_results = 0, double minimum_similarity_score = 0.8) =>
 {
-    // Exercise 3 Task 3 TODO #3: Insert code to call the ExecuteVectorSearch function on the Vectorization Service. Don't forget to remove the NotImplementedException.
-    throw new NotImplementedException();
+    var results = await vectorizationService.ExecuteVectorSearch(queryVector, max_results, minimum_similarity_score);
+    return results;
 })
     .WithName("VectorSearch")
     .WithOpenApi();
